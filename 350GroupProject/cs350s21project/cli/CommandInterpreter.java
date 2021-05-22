@@ -40,7 +40,6 @@ public class CommandInterpreter
 
 	public void evaluate(String commandText) throws ParseException
 	{
-		
 		//Parses commandText into separate commands if there are more than 1
 		if(commandText.isEmpty() || commandText.equals(""))
 		{
@@ -88,6 +87,7 @@ public class CommandInterpreter
 			
 			
 		}
+
 	}
 	
 	// Command 1.1 helper method
