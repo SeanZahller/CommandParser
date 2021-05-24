@@ -11,6 +11,7 @@ import cs350s21project.datatype.*;
 
 public class CommandInterpreter 
 {
+	CommandManagers cmd = CommandManagers.getInstance();
 	//all fields
 	private Altitude altitude;
 	private AttitudeYaw azimuth;
@@ -21,6 +22,8 @@ public class CommandInterpreter
 	private String filename;
 	private FieldOfView fov;
 	private AgentID id;
+	private AgentID fuzeId;
+	private AgentID sensorId;
 	private Latitude latitude;
 	private Longitude longitude;
 	private Power power;
@@ -36,6 +39,8 @@ public class CommandInterpreter
 	private Longitude longGridSpacing;
 	private Longitude horizontalExtent;
 	private Longitude longCenter;
+	
+	
 	
 
 	public void evaluate(String commandText) throws ParseException
@@ -74,14 +79,91 @@ public class CommandInterpreter
 			String[] pieces = command.split(" ");
 			
 			//Command 1.1 create top window view
-			if(pieces[0].equalsIgnoreCase("create") && pieces[1].equalsIgnoreCase("window"))// if the commands first 2 strings = create and window
+			if(pieces[0].equalsIgnoreCase("create")// if the commands first string = create
 			{
-				topViewCommand(pieces, command); // Calling helper method for command 1.1
 				
-			}//End of command 1.1
+				if(pieces[1].equalsIgnoreCase("window"))//if the command second string = window
+				{
+					topViewCommand(pieces, command); // Calling helper method for command 1.1
+				}
+				
+				
+				else if(pieces[1].equalsIgnoreCase("actor"))//if the command second string = actor
+				{
+					// Calling helper method for command 1.1
+				}
+				
+				
+				
+			}
 			
-			//*****************next command code below*****************
-			//else if(pieces[0].equalsIgnoreCase("???") && pieces[1].equalsIgnoreCase("???"))
+			else if(pieces[0].equalsIgnoreCase("define")// if the commands first string = define
+			{
+				if(pieces[1].equalsIgnoreCase("ship"))//if the command second string =ship
+				{
+					
+				}
+				else if(pieces[1].equalsIgnoreCase("munition"))//if the command second string = munitions
+				{
+					if(pieces[2].equalsIgnoreCase("bomb"))
+					{
+						bombCommand(pieces,command);
+					}
+					else if(pieces[2].equalsIgnoreCase("missile"))
+					{
+						missileCommand(pieces,command);
+					}
+				}
+				else if(pieces[1].equalsIgnoreCase("sensor"))//if the command second string = sensor
+				{
+					if(pieces[2].equalsIgnoreCase("radar"))
+					{
+						radarCommand(pieces,command);
+					}
+					else if(pieces[2].equalsIgnoreCase("thermal"))
+					{
+						thermalCommand(pieces,command);
+					}
+					else if(pieces[2].equalsIgnoreCase("sonar"))//passive
+					{
+						
+					}
+					
+				}
+				
+				
+			}
+			else if(pieces[0].equalsIgnoreCase("delete"))
+			{
+				
+			}
+			else if(pieces[0].equalsIgnoreCase("set"))
+			{
+				
+			}
+			else if(pieces[0].equalsIgnoreCase("@load"))
+			{
+				
+			}
+			else if(pieces[0].equalsIgnoreCase("@wait"))
+			{
+				
+			}
+			else if(pieces[0].equalsIgnoreCase("@pause"))
+			{
+				
+			}
+			else if(pieces[0].equalsIgnoreCase("@set"))
+			{
+				
+			}
+			
+			
+			else if(pieces[0].equalsIgnoreCase("@exit"))
+			{
+				exitCommand(pieces,command);
+			}
+			
 			
 			
 			
@@ -90,7 +172,7 @@ public class CommandInterpreter
 
 	}
 	
-	// Command 1.1 helper method
+	// Views
 	private void topViewCommand(String [] pieces, String command) 
 	{
 		this.id = new AgentID(pieces[2]); //create AgentID through cs350s21project.datatype.AgentID from javadoc
@@ -114,6 +196,70 @@ public class CommandInterpreter
 		new CommandViewCreateWindowTop(CommandManagers.getInstance(), command, this.id, this.size, this.center, this.extent,
             								this.gridSpacing, this.longCenter, this.horizontalExtent, this.longGridSpacing);
 	} // End of command 1.1 helper method
+	
+	
+	
+	
+	
+	//Munitions
+	private void bombCommand(String [] pieces, String command)
+	{
+		this.id = new AgentId(pieces[3]);
+		cmd.schedule(new CommandMunitionDefineBomb(cmd,command,id));
+		System.out.print("Created"+ this.id);
+		
+	}
+	private void missileCommand(String [] pieces, String command)
+	{
+		this.id = new AgentId(pieces[3]);
+		this.sensorId = new AgentId(pieces[6]);
+		this.fuzeId = new AgentId(pieces[8]);
+		DistanceNauticalMiles distance = new DistanceNauticalMiles(Double.parseDouble(new AgentId(pieces[11])));
+		
+		
+		cmd.schedule(new CommandMunitionDefineMissile(cmd,command,id,sensorId,fuzeId,distance));
+		System.out.print("Created"+ this.id + "with sensor" + this.sensorId + "with fuze " + this.fuzeId + " and arming distance of: "+ distance);
+		
+	}
+	
+	
+	
+	//sensors
+	private void radarCommand(String [] pieces,String command)
+	{
+		sensorId = new AgentId(pieces[3]);
+		fov =  new AgentId(pieces[8]);
+		power = new AgentId(pieces[10]);
+		sensitivity = new AgentId(pieces[12]);
+		
+		sensitivity = Double.parseDouble(sensitivity);
+		power = Double.parseDouble(power);
+		AngleNavigational angleDegree = new AngleNavigational(Double.parseDouble(fov));
+		
+		cmd.schedule(new CommandSensorDefineRadar(cmd,command,sensorId,angleDegree,power, sensitivity));
+		
+	}
+	private void thermalCommand(String[] pieces,String command)
+	{
+		sensorId = new AgentId(pieces[3]);
+		fov =  new AgentId(pieces[8]);
+		sensitivity = new AgentId(pieces[10]);
+		
+		sensitivity = Double.parseDouble(sensitivity);
+		AngleNavigational angleDegree = new AngleNavigational(Double.parseDouble(fov));
+		
+		cmd.schedule(new CommandSensorDefineThermal(cmd,command,sensorId,angleDegreee,sensitivity));
+		
+	}
+	
+	
+	
+	//MISC
+	private void exitCommand(String[] pieces, String command)
+	{
+		id = new AgentId(pieces[2]);
+		cmd.schedule( new CommandViewExitWindow(cmd,command,id));
+	}
 	
 	
 	
