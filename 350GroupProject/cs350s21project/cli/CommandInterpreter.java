@@ -113,6 +113,8 @@ public class CommandInterpreter
 					{
 						missileCommand(pieces,command);
 					}
+					
+					//next munition goes here.
 				}
 				else if(pieces[1].equalsIgnoreCase("sensor"))//if the command second string = sensor
 				{
@@ -126,8 +128,10 @@ public class CommandInterpreter
 					}
 					else if(pieces[2].equalsIgnoreCase("sonar"))//passive
 					{
-						
+						sonarCommand(pieces,command);
 					}
+					
+					//next sensor goes here
 					
 				}
 				
@@ -157,7 +161,6 @@ public class CommandInterpreter
 			{
 				
 			}
-			
 			
 			else if(pieces[0].equalsIgnoreCase("@exit"))
 			{
@@ -250,6 +253,26 @@ public class CommandInterpreter
 		
 		cmd.schedule(new CommandSensorDefineThermal(cmd,command,sensorId,angleDegreee,sensitivity));
 		
+	}
+	private void sonarCommand(String[] pieces,String command)
+	{
+		String type = new AgentId(pieces[3]);
+		sensorId = new AgentId(pieces[4]);
+		if(type.equals("passive"))
+		{
+			sensitivity = new AgentId(pieces[7]);
+			sensitivity = Double.parseDouble(sensitivity);
+			cmd.schedule(new CommandSensorDefineSonarPassive(cmd,command,sensorId,sensitivity));
+			
+		}
+		else if(type.contentEquals("active"))
+		{
+			
+		}
+		else
+		{
+			System.out.print("error");
+		}
 	}
 	
 	
