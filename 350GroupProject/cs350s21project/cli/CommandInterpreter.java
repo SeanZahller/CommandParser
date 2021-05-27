@@ -24,6 +24,7 @@ public class CommandInterpreter
 	private AgentID id;
 	private AgentID fuzeId;
 	private AgentID sensorId;
+	private AgentID munitionId;
 	private Latitude latitude;
 	private Longitude longitude;
 	private Power power;
@@ -134,14 +135,34 @@ public class CommandInterpreter
 					//next sensor goes here
 					
 				}
-				
-				
-			}
-			else if(pieces[0].equalsIgnoreCase("delete"))
-			{
-				
 			}
 			else if(pieces[0].equalsIgnoreCase("set"))
+			{
+				if(pieces[2].equalsIgnoreCase("load"))
+				{
+					setLoadMunitionCommand(pieces,command);
+				}
+				else if(pieces[2].equalsIgnoreCase("deploy"))
+				{
+						
+				}
+				else if(pieces[2].equalsIgnoreCase("speed "))
+				{
+					
+				}
+				else if(pieces[2].equalsIgnoreCase("course"))
+				{
+					setCourseCommand(pieces,command);
+				}
+				else if(pieces[2].equalsIgnoreCase("altitude"))
+				{	
+					
+				}
+			}
+				
+				
+			
+			else if(pieces[0].equalsIgnoreCase("delete"))
 			{
 				
 			}
@@ -149,15 +170,23 @@ public class CommandInterpreter
 			{
 				
 			}
-			else if(pieces[0].equalsIgnoreCase("@wait"))
-			{
-				
-			}
 			else if(pieces[0].equalsIgnoreCase("@pause"))
 			{
 				
 			}
+			else if(pieces[0].equalsIgnoreCase("@resume"))
+			{
+				
+			}
 			else if(pieces[0].equalsIgnoreCase("@set"))
+			{
+				
+			}
+			else if(pieces[0].equalsIgnoreCase("@wait"))
+			{
+				
+			}
+			else if(pieces[0].equalsIgnoreCase("@force"))
 			{
 				
 			}
@@ -217,7 +246,7 @@ public class CommandInterpreter
 		this.id = new AgentId(pieces[3]);
 		this.sensorId = new AgentId(pieces[6]);
 		this.fuzeId = new AgentId(pieces[8]);
-		DistanceNauticalMiles distance = new DistanceNauticalMiles(Double.parseDouble(new AgentId(pieces[11])));
+		distance = new DistanceNauticalMiles(Double.parseDouble(new AgentId(pieces[11])));
 		
 		
 		cmd.schedule(new CommandMunitionDefineMissile(cmd,command,id,sensorId,fuzeId,distance));
@@ -277,7 +306,29 @@ public class CommandInterpreter
 	
 	
 	
+	//Set Commands
+	private void setLoadMunitionCommand(String[] pieces,String command)
+	{
+		this.id= new AgentId(pieces[1]);
+		this.munitionId = new AgentId(pieces[4]);
+		cmd.schedule(new CommanderActorLoadMunition(cmd,command,id,munitionId));
+		System.out.println("Set munition for "+ this.id + "from "+this.munitionId);
+	}
+	private void setCourseCommand(String[] pieces,String command)
+	{
+		this.Id = new AgentId(pieces[1]);
+		course = new Course(Double.parseDouble(pieces[3]));
+		cmd.schedule(new CommandActorSetCourse(cmd,command,id,course));
+		
+	}
+	
+	
+	
 	//MISC
+	private void forceCommand(String[] pieces,String command)
+	{
+		this.id = new AgentId(pieces[1]);
+	}
 	private void exitCommand(String[] pieces, String command)
 	{
 		id = new AgentId(pieces[2]);
