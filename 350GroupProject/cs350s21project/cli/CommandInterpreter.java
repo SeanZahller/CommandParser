@@ -236,7 +236,7 @@ public class CommandInterpreter
 	{
 		this.id = new AgentID(pieces[2]);
 		this.id2 = new AgentID(pieces[4]);
-		
+	
 		/* Must parse further and split up lat, long, and alt
 		this.latitude = 
 		this.longitude = 
