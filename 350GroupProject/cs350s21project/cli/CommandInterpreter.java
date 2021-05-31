@@ -7,17 +7,15 @@ import cs350s21project.datatype.*;
 
 
 //imports from javadoc
-import cs350s21project.controller.CommandManagers;
-import cs350s21project.controller.command.*;
+
 import cs350s21project.controller.command.actor.CommandActorCreateActor;
 import cs350s21project.controller.command.actor.CommandActorSetAltitudeDepth;
+import cs350s21project.controller.command.actor.CommandActorSetCourse;
 import cs350s21project.controller.command.misc.CommandMiscExit;
 import cs350s21project.controller.command.munition.CommandMunitionDefineBomb;
 import cs350s21project.controller.command.munition.CommandMunitionDefineDepthCharge;
 import cs350s21project.controller.command.munition.CommandMunitionDefineMissile;
-import cs350s21project.controller.command.parser.ParseException;
-import cs350s21project.controller.command.view.*;
-import cs350s21project.datatype.*;
+
 
 
 
@@ -36,6 +34,7 @@ public class CommandInterpreter
 	private AgentID id;
 	private AgentID fuzeId;
 	private AgentID sensorId;
+	private AgentID munitionId;
 	private Latitude latitude;
 	private Longitude longitude;
 	private Power power;
@@ -151,9 +150,12 @@ public class CommandInterpreter
 					//next sensor goes here
 					
 				}
+
 				
 				
 			}
+			
+			
 			else if(pieces[0].equalsIgnoreCase("delete"))
 			{
 				if(pieces[1].equalsIgnoreCase("window"))
@@ -163,16 +165,42 @@ public class CommandInterpreter
 			}
 			else if(pieces[0].equalsIgnoreCase("set"))
 			{
+
 				if(pieces[2].equalsIgnoreCase("altitude|depth"))
 				{
 					setAltitudeCommand(pieces, command);
 				}
+				
+				if(pieces[2].equalsIgnoreCase("load"))
+				{
+					setLoadMunitionCommand(pieces,command);
+				}
+				else if(pieces[2].equalsIgnoreCase("deploy"))
+				{
+						
+				}
+				else if(pieces[2].equalsIgnoreCase("speed "))
+				{
+					
+				}
+				else if(pieces[2].equalsIgnoreCase("course"))
+				{
+					setCourseCommand(pieces,command);
+				}
+				else if(pieces[2].equalsIgnoreCase("altitude"))
+				{	
+					
+				}
 			}
-			else if(pieces[0].equalsIgnoreCase("@load"))
+				
+				
+			
+			else if(pieces[0].equalsIgnoreCase("delete"))
 			{
 				
+
 			}
-			else if(pieces[0].equalsIgnoreCase("@wait"))
+			else if(pieces[0].equalsIgnoreCase("@load"))
 			{
 				
 			}
@@ -180,7 +208,19 @@ public class CommandInterpreter
 			{
 				
 			}
+			else if(pieces[0].equalsIgnoreCase("@resume"))
+			{
+				
+			}
 			else if(pieces[0].equalsIgnoreCase("@set"))
+			{
+				
+			}
+			else if(pieces[0].equalsIgnoreCase("@wait"))
+			{
+				
+			}
+			else if(pieces[0].equalsIgnoreCase("@force"))
 			{
 				
 			}
@@ -265,10 +305,17 @@ public class CommandInterpreter
 	}
 	private void missileCommand(String [] pieces, String command)
 	{
+
 		this.id = new AgentID(pieces[3]);
 		this.sensorId = new AgentID(pieces[6]);
 		this.fuzeId = new AgentID(pieces[8]);
-		//DistanceNauticalMiles distance = new DistanceNauticalMiles(Double.parseDouble(new AgentID(pieces[11])));
+		DistanceNauticalMiles distance = new DistanceNauticalMiles(Double.parseDouble(pieces[11]));
+
+		this.id = new AgentID(pieces[3]);
+		this.sensorId = new AgentID(pieces[6]);
+		this.fuzeId = new AgentID(pieces[8]);
+		distance = new DistanceNauticalMiles(Double.parseDouble(pieces[11]));
+
 		
 		
 		cmd.schedule(new CommandMunitionDefineMissile(cmd,command,id,sensorId,fuzeId,distance));
@@ -329,14 +376,37 @@ public class CommandInterpreter
 			
 		}
 	//	else
-		{
-			System.out.print("error");
-		}
+		//{
+		//	System.out.print("error");
+	//	}
+	}
+	
+	
+	
+	//Set Commands
+	private void setLoadMunitionCommand(String[] pieces,String command)
+	{
+		this.id= new AgentID(pieces[1]);
+		this.munitionId = new AgentID(pieces[4]);
+		//cmd.schedule(new CommanderActorLoadMunition(cmd,command,id,munitionId));
+		System.out.println("Set munition for "+ this.id + "from "+this.munitionId);
+	}
+	private void setCourseCommand(String[] pieces,String command)
+	{
+		this.id = new AgentID(pieces[1]);
+		course = new Course(Double.parseDouble(pieces[3]));
+		cmd.schedule(new CommandActorSetCourse(cmd,command,id,course));
+		
 	}
 	
 	
 	
 	//MISC
+	private void forceCommand(String[] pieces,String command)
+	{
+		this.id = new AgentID(pieces[1]);
+	}
+	
 	private void exitCommand(String[] pieces, String command)
 	{
 		id = new AgentID(pieces[2]);
