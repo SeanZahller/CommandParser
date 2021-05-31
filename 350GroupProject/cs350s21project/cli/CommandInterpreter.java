@@ -1,5 +1,10 @@
 package cs350s21project.cli;
 
+import cs350s21project.controller.CommandManagers;
+import cs350s21project.controller.command.parser.ParseException;
+import cs350s21project.controller.command.view.*;
+import cs350s21project.datatype.*;
+
 
 //imports from javadoc
 import cs350s21project.controller.CommandManagers;
@@ -236,7 +241,7 @@ public class CommandInterpreter
 	{
 		this.id = new AgentID(pieces[2]);
 		this.id2 = new AgentID(pieces[4]);
-	
+		
 		/* Must parse further and split up lat, long, and alt
 		this.latitude = 
 		this.longitude = 
