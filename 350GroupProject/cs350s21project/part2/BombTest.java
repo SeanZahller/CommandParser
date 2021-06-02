@@ -99,6 +99,7 @@ public class BombTest{
 			gaussianErrorWithWind[i] = bomb6.drop();
 			
 			//Add each to excel file here?
+			//Maybe 6 different loops and 6 different excel files to add to?
 		}
 	}
 	
