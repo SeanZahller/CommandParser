@@ -67,40 +67,5 @@ public class BombTest{
 		assertEquals(expectedErrorRange,ErrorRange3, 0,"getErrorRange()");
 	}
 	
-	public void behavioralTest() //Dont know if it needs @Test above, or if private or public or how to run, or if multiple methods needed for each test
-	{
-		
-		E_ErrorType exError1 = E_ErrorType.NONE;//todo
-		E_ErrorType exError2 = E_ErrorType.GAUSSIAN;
-		E_ErrorType exError3 = E_ErrorType.UNIFORM;
-		
-		Bomb bomb1 = new Bomb(200,300,1500,100,exError1,0,0,0); // No error no wind
-		Bomb bomb2 = new Bomb(200,300,1500,100,exError1,0,60,25); // No error with wind
-		Bomb bomb3 = new Bomb(200,300,1500,100,exError3,150,0,0); // Uniform error no wind
-		Bomb bomb4 = new Bomb(200,300,1500,100,exError2,150,0,0); // Gaussian error no wind
-		Bomb bomb5 = new Bomb(200,300,1500,100,exError3,150,60,25); // Uniform error with wind
-		Bomb bomb6 = new Bomb(200,300,1500,100,exError2,150,60,25); // Gaussian error with wind
-		
-		Coordinates[] noErrorNoWind = new Coordinates[100];
-		Coordinates[] noErrorWithWind = new Coordinates[100];;
-		Coordinates[] uniformErrorNoWind = new Coordinates[100];;
-		Coordinates[] gaussianErrorNoWind = new Coordinates[100];;
-		Coordinates[] uniformErrorWithWind = new Coordinates[100];;
-		Coordinates[] gaussianErrorWithWind = new Coordinates[100];;
-		
-		//Drops bomb 100 times, adds coordinates into a coordinate array. Dont know how or best way to put into excel
-		for(int i = 0; i < 101; i++)
-		{
-			noErrorNoWind[i] = bomb1.drop();
-			noErrorWithWind[i] = bomb2.drop();
-			uniformErrorNoWind[i] = bomb3.drop();
-			gaussianErrorNoWind[i] = bomb4.drop();
-			uniformErrorWithWind[i] = bomb5.drop();
-			gaussianErrorWithWind[i] = bomb6.drop();
-			
-			//Add each to excel file here?
-			//Maybe 6 different loops and 6 different excel files to add to?
-		}
-	}
 	
 }
