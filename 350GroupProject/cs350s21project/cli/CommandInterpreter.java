@@ -9,10 +9,6 @@ import cs350s21project.controller.command.sensor.CommandSensorDefineSonarPassive
 import cs350s21project.controller.command.sensor.CommandSensorDefineThermal;
 import cs350s21project.controller.command.view.*;
 import cs350s21project.datatype.*;
-
-
-//imports from javadoc
-
 import cs350s21project.controller.command.actor.CommandActorCreateActor;
 import cs350s21project.controller.command.actor.CommandActorDeployMunition;
 import cs350s21project.controller.command.actor.CommandActorLoadMunition;
