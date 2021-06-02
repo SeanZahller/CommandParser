@@ -2,6 +2,11 @@ package cs350s21project.cli;
 
 import cs350s21project.controller.CommandManagers;
 import cs350s21project.controller.command.parser.ParseException;
+import cs350s21project.controller.command.sensor.CommandSensorDefineDistance;
+import cs350s21project.controller.command.sensor.CommandSensorDefineRadar;
+import cs350s21project.controller.command.sensor.CommandSensorDefineSonarActive;
+import cs350s21project.controller.command.sensor.CommandSensorDefineSonarPassive;
+import cs350s21project.controller.command.sensor.CommandSensorDefineThermal;
 import cs350s21project.controller.command.view.*;
 import cs350s21project.datatype.*;
 
@@ -9,9 +14,13 @@ import cs350s21project.datatype.*;
 //imports from javadoc
 
 import cs350s21project.controller.command.actor.CommandActorCreateActor;
+import cs350s21project.controller.command.actor.CommandActorDeployMunition;
+import cs350s21project.controller.command.actor.CommandActorLoadMunition;
 import cs350s21project.controller.command.actor.CommandActorSetAltitudeDepth;
 import cs350s21project.controller.command.actor.CommandActorSetCourse;
 import cs350s21project.controller.command.misc.CommandMiscExit;
+import cs350s21project.controller.command.misc.CommandMiscPause;
+import cs350s21project.controller.command.misc.CommandMiscSetUpdate;
 import cs350s21project.controller.command.munition.CommandMunitionDefineBomb;
 import cs350s21project.controller.command.munition.CommandMunitionDefineDepthCharge;
 import cs350s21project.controller.command.munition.CommandMunitionDefineMissile;
@@ -57,7 +66,6 @@ public class CommandInterpreter
 
 	public void evaluate(String commandText) throws ParseException
 	{
-		//Parses commandText into separate commands if there are more than 1
 		if(commandText.isEmpty() || commandText.equals(""))
 		{
 			throw new ParseException("\"" + commandText + "\" is an invalid command");
@@ -75,7 +83,7 @@ public class CommandInterpreter
 		
 		for (String k : pieces)
 		{
-			createCommand(k); //create specific command from each separated commands given
+			createCommand(k); 
 		}
 	}//end of evaluate
 	
@@ -142,9 +150,22 @@ public class CommandInterpreter
 					{
 						thermalCommand(pieces,command);
 					}
+					else if(pieces[2].equalsIgnoreCase("distance"))
+					{
+						distanceSensorCommand(pieces,command);
+					}
 					else if(pieces[2].equalsIgnoreCase("sonar"))
 					{
-						sonarCommand(pieces,command);
+						if(pieces[3].equalsIgnoreCase("active"))
+						{
+							sonarCommandActive(pieces, command);
+						}
+						
+						else if(pieces[3].equalsIgnoreCase("passive"))
+						{
+							sonarCommand(pieces,command);
+						}
+					
 					}
 					
 					//next sensor goes here
@@ -177,7 +198,7 @@ public class CommandInterpreter
 				}
 				else if(pieces[2].equalsIgnoreCase("deploy"))
 				{
-						
+					setDeployMunition(pieces, command);
 				}
 				else if(pieces[2].equalsIgnoreCase("speed "))
 				{
@@ -206,7 +227,7 @@ public class CommandInterpreter
 			}
 			else if(pieces[0].equalsIgnoreCase("@pause"))
 			{
-				
+				 pauseCommand(pieces, command);
 			}
 			else if(pieces[0].equalsIgnoreCase("@resume"))
 			{
@@ -214,7 +235,7 @@ public class CommandInterpreter
 			}
 			else if(pieces[0].equalsIgnoreCase("@set"))
 			{
-				
+				updateTimeCommand(pieces, command);
 			}
 			else if(pieces[0].equalsIgnoreCase("@wait"))
 			{
@@ -222,7 +243,7 @@ public class CommandInterpreter
 			}
 			else if(pieces[0].equalsIgnoreCase("@force"))
 			{
-				
+				forceCommand(pieces, command);
 			}
 			
 			else if(pieces[0].equalsIgnoreCase("@exit"))
@@ -230,15 +251,14 @@ public class CommandInterpreter
 				exitCommand(pieces,command);
 			}
 			
-			
-					
 		}
 
 	}
 	
 	
-	
-	
+
+
+
 	// Views
 	private void topViewCommand(String [] pieces, String command) 
 	{
@@ -336,49 +356,55 @@ public class CommandInterpreter
 	//sensors
 	private void radarCommand(String [] pieces,String command)
 	{
-		sensorId = new AgentID(pieces[3]);
-		//fov =  new AgentID(pieces[8]);
-		//power = new AgentId(pieces[10]);
-		//sensitivity = new AgentId(pieces[12]);
-		
-		//sensitivity = Double.parseDouble(sensitivity);
-		//power = Double.parseDouble(power);
-		//AngleNavigational angleDegree = new AngleNavigational(Double.parseDouble(fov));
-		
-		//cmd.schedule(new CommandSensorDefineRadar(cmd,command,sensorId,angleDegree,power, sensitivity));
+		this.id = new AgentID(pieces[3]);
+		double temp = Double.parseDouble(pieces[8]);
+		AngleNavigational angleDegree = new AngleNavigational(temp);
+		this.fov =  new FieldOfView(angleDegree);
+		this.power = new Power(Double.parseDouble(pieces[10]));
+		this.sensitivity = new Sensitivity(Double.parseDouble(pieces[12]));
+
+		cmd.schedule(new CommandSensorDefineRadar(cmd,command,this.id,this.fov,this.power, this.sensitivity));
 		
 	}
 	private void thermalCommand(String[] pieces,String command)
 	{
-		//sensorId = new AgentId(pieces[3]);
-		//fov =  new AgentId(pieces[8]);
-		//sensitivity = new AgentId(pieces[10]);
-		
-		//sensitivity = Double.parseDouble(sensitivity);
-		//AngleNavigational angleDegree = new AngleNavigational(Double.parseDouble(fov));
-		
-		//cmd.schedule(new CommandSensorDefineThermal(cmd,command,sensorId,angleDegreee,sensitivity));
+		this.id = new AgentID(pieces[3]);
+		double temp = Double.parseDouble(pieces[8]);
+		AngleNavigational angleDegree = new AngleNavigational(temp);
+		this.fov =  new FieldOfView(angleDegree);
+		this.sensitivity = new Sensitivity(Double.parseDouble(pieces[10]));
+
+		cmd.schedule(new CommandSensorDefineThermal(cmd,command,this.id,this.fov,this.sensitivity));
 		
 	}
+	
 	private void sonarCommand(String[] pieces,String command)
 	{
-		//String type = new AgentID(pieces[3]);
-		sensorId = new AgentID(pieces[4]);
-		//if(type.equals("passive"))
-		{
-			//sensitivity = new AgentId(pieces[7]);
-			//sensitivity = Double.parseDouble(sensitivity);
-			//cmd.schedule(new CommandSensorDefineSonarPassive(cmd,command,sensorId,sensitivity));
-			
-		}
-		//else if(type.contentEquals("active"))
-		{
-			
-		}
-	//	else
-		//{
-		//	System.out.print("error");
-	//	}
+		this.id = new AgentID(pieces[4]);
+		this.sensitivity = new Sensitivity(Double.parseDouble(pieces[7]));
+
+		cmd.schedule(new CommandSensorDefineSonarPassive(cmd,command,this.id,this.sensitivity));
+	}
+	
+
+	private void sonarCommandActive(String[] pieces, String command) 
+	{
+		this.id = new AgentID(pieces[4]);
+		this.power = new Power(Double.parseDouble(pieces[7]));
+		this.sensitivity = new Sensitivity(Double.parseDouble(pieces[9]));
+		
+		cmd.schedule(new CommandSensorDefineSonarActive(cmd, command, this.id, this.power, this.sensitivity));
+		
+	}
+	
+
+	private void distanceSensorCommand(String[] pieces, String command) 
+	{
+		this.id = new AgentID(pieces[3]);
+		this.distance = new DistanceNauticalMiles(Double.parseDouble(pieces[7]));
+		
+		cmd.schedule(new CommandSensorDefineDistance(cmd, command, this.id, this.distance));
+		
 	}
 	
 	
@@ -388,7 +414,7 @@ public class CommandInterpreter
 	{
 		this.id= new AgentID(pieces[1]);
 		this.munitionId = new AgentID(pieces[4]);
-		//cmd.schedule(new CommanderActorLoadMunition(cmd,command,id,munitionId));
+		cmd.schedule(new CommandActorLoadMunition(cmd,command,id,munitionId));
 		System.out.println("Set munition for "+ this.id + "from "+this.munitionId);
 	}
 	private void setCourseCommand(String[] pieces,String command)
@@ -399,12 +425,20 @@ public class CommandInterpreter
 		
 	}
 	
+	private void setDeployMunition(String[] pieces, String command) 
+	{
+		this.id = new AgentID(pieces[1]);
+		this.id2 = new AgentID(pieces[4]);
+		cmd.schedule(new CommandActorDeployMunition(cmd, command, this.id, this.id2));
+		
+	}
+
 	
 	
 	//MISC
 	private void forceCommand(String[] pieces,String command)
 	{
-		this.id = new AgentID(pieces[1]);
+		this.id = new AgentID(pieces[1]); ///This isnt finished ************
 	}
 	
 	private void exitCommand(String[] pieces, String command)
@@ -413,6 +447,15 @@ public class CommandInterpreter
 		cmd.schedule( new CommandMiscExit(cmd,command));
 	}
 	
+	private void pauseCommand(String[] pieces, String command)
+	{
+		cmd.schedule(new CommandMiscPause(cmd, command));
+	}
+	
+	private void updateTimeCommand(String[] pieces, String command) 
+	{
+		cmd.schedule(new CommandMiscSetUpdate(cmd, command, this.time));
+	}
 	
 	
 	//Next helper method for your command
