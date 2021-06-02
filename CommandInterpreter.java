@@ -2,32 +2,32 @@ package cs350s21project.cli;
 
 import cs350s21project.controller.CommandManagers;
 import cs350s21project.controller.command.parser.ParseException;
-import cs350s21project.controller.command.sensor.CommandSensorDefineRadar;
-
+import cs350s21project.controller.command.sensor.CommandSensorDefineAcoustic;
+import cs350s21project.controller.command.sensor.CommandSensorDefineDepth;
 import cs350s21project.controller.command.sensor.CommandSensorDefineDistance;
 import cs350s21project.controller.command.sensor.CommandSensorDefineRadar;
 import cs350s21project.controller.command.sensor.CommandSensorDefineSonarActive;
-
 import cs350s21project.controller.command.sensor.CommandSensorDefineSonarPassive;
 import cs350s21project.controller.command.sensor.CommandSensorDefineThermal;
+import cs350s21project.controller.command.sensor.CommandSensorDefineTime;
 import cs350s21project.controller.command.view.*;
 import cs350s21project.datatype.*;
 import cs350s21project.controller.command.actor.CommandActorCreateActor;
 import cs350s21project.controller.command.actor.CommandActorDeployMunition;
+import cs350s21project.controller.command.actor.CommandActorDeployMunitionShell;
 import cs350s21project.controller.command.actor.CommandActorLoadMunition;
 import cs350s21project.controller.command.actor.CommandActorSetAltitudeDepth;
 import cs350s21project.controller.command.actor.CommandActorSetCourse;
-import cs350s21project.controller.command.actor.CommandActorSetState;
 import cs350s21project.controller.command.misc.CommandMiscExit;
-
-import cs350s21project.controller.command.misc.CommandMiscLoad;
-
 import cs350s21project.controller.command.misc.CommandMiscPause;
+import cs350s21project.controller.command.misc.CommandMiscResume;
 import cs350s21project.controller.command.misc.CommandMiscSetUpdate;
-
+import cs350s21project.controller.command.misc.CommandMiscWait;
 import cs350s21project.controller.command.munition.CommandMunitionDefineBomb;
 import cs350s21project.controller.command.munition.CommandMunitionDefineDepthCharge;
 import cs350s21project.controller.command.munition.CommandMunitionDefineMissile;
+import cs350s21project.controller.command.munition.CommandMunitionDefineShell;
+import cs350s21project.controller.command.munition.CommandMunitionDefineTorpedo;
 
 
 
@@ -48,7 +48,6 @@ public class CommandInterpreter
 	private AgentID fuzeId;
 	private AgentID sensorId;
 	private AgentID munitionId;
-	private AgentID sonartype;
 	private Latitude latitude;
 	private Longitude longitude;
 	private Power power;
@@ -126,7 +125,7 @@ public class CommandInterpreter
 			{
 				if(pieces[1].equalsIgnoreCase("ship"))
 				{
-					
+					defineShipCommand(pieces, command);
 				}
 				else if(pieces[1].equalsIgnoreCase("munition"))
 				{
@@ -142,6 +141,19 @@ public class CommandInterpreter
 					{
 						depthChargeCommand(pieces,command);
 					}
+					else if(pieces[2].equalsIgnoreCase("shell"))
+					{
+						shellCommand(pieces,command);
+					}
+					else if(pieces[2].equalsIgnoreCase("torpedo"))
+					{
+						torpedoCommand(pieces,command);
+					}
+					else if(pieces[1].equalsIgnoreCase("munition_shell"))
+					{
+					 deployMunitionShellCommand(pieces, command);
+					}
+					
 					
 					//next munition goes here.
 				}
@@ -171,6 +183,18 @@ public class CommandInterpreter
 							sonarCommand(pieces,command);
 						}
 					
+					}
+					if(pieces[2].equalsIgnoreCase("acoustic"))
+					{
+						acousticCommand(pieces,command);
+					}
+					if(pieces[2].equalsIgnoreCase("depth"))
+					{
+						depthCommand(pieces,command);
+					}
+					if(pieces[2].equalsIgnoreCase("time"))
+					{
+						timeCommand(pieces,command);
 					}
 					
 					//next sensor goes here
@@ -207,7 +231,7 @@ public class CommandInterpreter
 				}
 				else if(pieces[2].equalsIgnoreCase("speed "))
 				{
-					
+					setSpeedCommand(pieces, command);
 				}
 				else if(pieces[2].equalsIgnoreCase("course"))
 				{
@@ -215,13 +239,20 @@ public class CommandInterpreter
 				}
 				else if(pieces[2].equalsIgnoreCase("altitude"))
 				{	
-					
+					setAltitudeCommand(pieces, command);
 				}
 			}
 				
+				
+			
+			else if(pieces[0].equalsIgnoreCase("delete"))
+			{
+				
+
+			}
 			else if(pieces[0].equalsIgnoreCase("@load"))
 			{
-				loadCommand(pieces,command);
+				
 			}
 			else if(pieces[0].equalsIgnoreCase("@pause"))
 			{
@@ -229,7 +260,7 @@ public class CommandInterpreter
 			}
 			else if(pieces[0].equalsIgnoreCase("@resume"))
 			{
-				
+				resumeCommand(pieces, command);
 			}
 			else if(pieces[0].equalsIgnoreCase("@set"))
 			{
@@ -237,11 +268,11 @@ public class CommandInterpreter
 			}
 			else if(pieces[0].equalsIgnoreCase("@wait"))
 			{
-				
+				waitCommand(pieces, command);
 			}
 			else if(pieces[0].equalsIgnoreCase("@force"))
 			{
-				forceCommand(pieces,command);
+				forceCommand(pieces, command);
 			}
 			
 			else if(pieces[0].equalsIgnoreCase("@exit"))
@@ -252,42 +283,8 @@ public class CommandInterpreter
 		}
 
 	}
-	private Latitude setLatitude(String str)
-	{
-		String [] lat = str.split("[*#*\"]");
-		return new Latitude(Integer.parseInt(lat[0]),Integer.parseInt(lat[1]),Double.parseDouble(lat[2]));
-	}
-	private Longitude setLongtitude(String str)
-	{
-		String [] lon = str.split("[*#*\"]");
-		return new Longitude(Integer.parseInt(lon[0]),Integer.parseInt(lon[1]),Double.parseDouble(lon[2]));
-	}
-	private CoordinateWorld3D setCoordinates(String coordinate)
-	{
-		String[] coordinates = coordinate.split("/");
-		Latitude lat = setLatitude(coordinates[0]);
-		Longitude lon = setLongtitude(coordinates[1]);
-		Altitude alt = new Altitude(Integer.parseInt(coordinates[2]));
-		CoordinateWorld3D location = new CoordinateWorld3D(lat,lon,alt);
-		
-		return location;
-	}
 	
-	private Power setPower(String power)
-	{
-		return new Power(Double.parseDouble(power));
-	}
-	private Sensitivity setSensitivity(String sensitivity)
-	{
-		return new Sensitivity(Double.parseDouble(sensitivity));
-	}
-	private FieldOfView setFov(String degree)
-	{
-		AngleNavigational view = new AngleNavigational(Double.parseDouble(degree));
-		return new FieldOfView(view);
-	}
 	
-
 
 
 	// Views
@@ -317,8 +314,6 @@ public class CommandInterpreter
 		cmd.schedule(new CommandViewDeleteWindow(cmd, command, this.id));
 	}
 	
-	
-	
 	//actors
 	private void setAltitudeCommand(String [] pieces, String command) 
 	{
@@ -344,19 +339,33 @@ public class CommandInterpreter
 		cmd.schedule(new CommandActorCreateActor(cmd, command, this.id, this.id2, this.coordinates, this.course, this.speed));
 	}
 	
+	private void defineShipCommand(String [] pieces, String command)
+	{
+		//not finished
+	}
 	
+	private void setSpeedCommand(String [] pieces, String command) {
+		this.id = new AgentID(pieces[1]);
+		this.speed = new Groundspeed(Double.parseDouble(pieces[2]));
+		
+		cmd.schedule(new CommandActorSetAltitudeDepth(cmd, command, this.id, this.altitude));
+	}
 	
 	//Munitions
 	private void bombCommand(String [] pieces, String command)
 	{
 		this.id = new AgentID(pieces[3]);
 		cmd.schedule(new CommandMunitionDefineBomb(cmd,command,id));
-	
+		System.out.print("Created"+ this.id);
 		
 	}
 	private void missileCommand(String [] pieces, String command)
 	{
 
+		this.id = new AgentID(pieces[3]);
+		this.sensorId = new AgentID(pieces[6]);
+		this.fuzeId = new AgentID(pieces[8]);
+		DistanceNauticalMiles distance = new DistanceNauticalMiles(Double.parseDouble(pieces[11]));
 
 		this.id = new AgentID(pieces[3]);
 		this.sensorId = new AgentID(pieces[6]);
@@ -365,8 +374,8 @@ public class CommandInterpreter
 
 		
 		
-		cmd.schedule(new CommandMunitionDefineMissile(cmd,command,id,this.sensorId,this.fuzeId,distance));
-		
+		cmd.schedule(new CommandMunitionDefineMissile(cmd,command,id,sensorId,fuzeId,distance));
+		System.out.print("Created"+ this.id + "with sensor" + this.sensorId + "with fuze " + this.fuzeId + " and arming distance of: "+ distance);
 		
 	}
 	
@@ -378,57 +387,64 @@ public class CommandInterpreter
 		cmd.schedule(new CommandMunitionDefineDepthCharge(cmd, command, this.id, this.id2));
 	}
 	
+	private void deployMunitionShellCommand(String [] pieces, String command)
+	{
+		this.id = new AgentID(pieces[3]);
+		this.fuzeId = new AgentID(pieces[8]);
+		this.azimuth = new AttitudeYaw(Double.parseDouble(pieces[11]));
+		this.elevation = new AttitudePitch(Double.parseDouble(pieces[2]));
+		cmd.schedule(new CommandActorDeployMunitionShell(cmd,command,this.id, this.fuzeId, this.azimuth, this.elevation));
+		
+	}
+	private void shellCommand(String [] pieces, String command)
+	{
+		this.id = new AgentID(pieces[3]);
+		
+		cmd.schedule(new CommandMunitionDefineShell(cmd,command,id));
+		
+	}
 	
+	private void torpedoCommand(String [] pieces, String command)
+	{
+		this.id = new AgentID(pieces[3]);
+		this.sensorId = new AgentID(pieces[6]);
+		this.fuzeId = new AgentID(pieces[8]);
+		this.time = new Time(Double.parseDouble(pieces[7]));
+		cmd.schedule(new CommandMunitionDefineTorpedo(cmd,command,this.id,this.sensorId,this.fuzeId,this.time));
+		
+	}
 	
 	//sensors
 	private void radarCommand(String [] pieces,String command)
 	{
-		sensorId = new AgentID(pieces[3]);
-		
-		
-		fov =  this.setFov(pieces[8]);
-		power = this.setPower(pieces[10]);
-		sensitivity = this.setSensitivity(pieces[12]);
-		
-		cmd.schedule(new CommandSensorDefineRadar(cmd,command,sensorId,fov,power, sensitivity));
+		this.id = new AgentID(pieces[3]);
+		double temp = Double.parseDouble(pieces[8]);
+		AngleNavigational angleDegree = new AngleNavigational(temp);
+		this.fov =  new FieldOfView(angleDegree);
+		this.power = new Power(Double.parseDouble(pieces[10]));
+		this.sensitivity = new Sensitivity(Double.parseDouble(pieces[12]));
 
-		
-
+		cmd.schedule(new CommandSensorDefineRadar(cmd,command,this.id,this.fov,this.power, this.sensitivity));
 		
 	}
 	private void thermalCommand(String[] pieces,String command)
 	{
-		sensorId = new AgentID(pieces[3]);
-		
-		fov =  this.setFov(pieces[8]);
-		sensitivity = this.setSensitivity(pieces[10]);
-		
-		
-		
-		cmd.schedule(new CommandSensorDefineThermal(cmd,command,sensorId,fov,sensitivity));
+		this.id = new AgentID(pieces[3]);
+		double temp = Double.parseDouble(pieces[8]);
+		AngleNavigational angleDegree = new AngleNavigational(temp);
+		this.fov =  new FieldOfView(angleDegree);
+		this.sensitivity = new Sensitivity(Double.parseDouble(pieces[10]));
+
+		cmd.schedule(new CommandSensorDefineThermal(cmd,command,this.id,this.fov,this.sensitivity));
 		
 	}
 	
 	private void sonarCommand(String[] pieces,String command)
 	{
+		this.id = new AgentID(pieces[4]);
+		this.sensitivity = new Sensitivity(Double.parseDouble(pieces[7]));
 
-		sonartype = new AgentID(pieces[3]);
-		
-		sensorId = new AgentID(pieces[4]);
-		/*if(sonartype.equalsIgnoreCase("passive"))
-		{
-			sensitivity = this.setSensitivity(pieces[7]);
-			cmd.schedule(new CommandSensorDefineSonarPassive(cmd,command,sensorId,sensitivity));
-			
-		}
-		else if(type.equalsIgnoreCase("active"))
-		{
-			System.out.print("active sensor");
-		}*/
-	//	else
-		//{
-		//	System.out.print("error");
-	//	}
+		cmd.schedule(new CommandSensorDefineSonarPassive(cmd,command,this.id,this.sensitivity));
 	}
 	
 
@@ -452,7 +468,30 @@ public class CommandInterpreter
 		
 	}
 	
+	private void acousticCommand(String[] pieces,String command)
+	{
+		sensorId = new AgentID(pieces[3]);
+		this.sensitivity = new Sensitivity(Double.parseDouble(pieces[7]));
+
+		cmd.schedule(new CommandSensorDefineAcoustic(cmd,command,this.sensorId,this.sensitivity));
+		
+	}
 	
+	private void depthCommand(String[] pieces,String command)
+	{
+		sensorId = new AgentID(pieces[3]);
+		this.altitude = new Altitude(Double.parseDouble(pieces[2]));
+		cmd.schedule(new CommandSensorDefineDepth(cmd,command,this.sensorId,this.altitude));
+		
+	}
+	
+	private void timeCommand(String[] pieces,String command)
+	{
+		sensorId = new AgentID(pieces[3]);
+		this.time = new Time(Double.parseDouble(pieces[7]));
+		cmd.schedule(new CommandSensorDefineTime(cmd,command,this.sensorId,this.time));
+		
+	}
 	
 	//Set Commands
 	private void setLoadMunitionCommand(String[] pieces,String command)
@@ -466,7 +505,7 @@ public class CommandInterpreter
 	{
 		this.id = new AgentID(pieces[1]);
 		course = new Course(Double.parseDouble(pieces[3]));
-		cmd.schedule(new CommandActorSetCourse(cmd,command,id,course));
+		cmd.schedule(new CommandActorSetCourse(cmd,command,this.id,this.course));
 		
 	}
 	
@@ -481,21 +520,9 @@ public class CommandInterpreter
 	
 	
 	//MISC
-	private void loadCommand(String[] pieces,String command)
-	{
-		this.id = new AgentID(pieces[1]);
-		cmd.schedule(new CommandMiscLoad(cmd,command, pieces[1]));
-	}
 	private void forceCommand(String[] pieces,String command)
 	{
-		this.id = new AgentID(pieces[1]);
-		
-		coordinates = setCoordinates(pieces[4]);
-		course = new Course(Double.parseDouble(pieces[7]));
-		speed = new Groundspeed(Double.parseDouble(pieces[9]));
-		
-		cmd.schedule(new CommandActorSetState(cmd, command,id, coordinates,course,speed));
-
+		this.id = new AgentID(pieces[1]); ///This isnt finished ************
 	}
 	
 	private void exitCommand(String[] pieces, String command)
@@ -514,8 +541,16 @@ public class CommandInterpreter
 		cmd.schedule(new CommandMiscSetUpdate(cmd, command, this.time));
 	}
 	
+	private void waitCommand(String[] pieces, String command)
+	{
+
+		cmd.schedule( new CommandMiscWait(cmd,command,this.time));
+	}
+	
+	private void resumeCommand(String[] pieces, String command)
+	{
+		cmd.schedule( new CommandMiscResume(cmd,command));
+	}
+}
 	
 	//Next helper method for your command
-	
-	
-}// End of CommandInterpreter
