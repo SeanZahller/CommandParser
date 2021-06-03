@@ -5,7 +5,6 @@ import cs350s21project.controller.command.parser.ParseException;
 import cs350s21project.controller.command.sensor.CommandSensorDefineRadar;
 
 import cs350s21project.controller.command.sensor.CommandSensorDefineDistance;
-import cs350s21project.controller.command.sensor.CommandSensorDefineRadar;
 import cs350s21project.controller.command.sensor.CommandSensorDefineSonarActive;
 
 import cs350s21project.controller.command.sensor.CommandSensorDefineSonarPassive;
@@ -107,7 +106,7 @@ public class CommandInterpreter
 			if(pieces[0].equalsIgnoreCase("create"))
 			{
 				
-				if(pieces[1].equalsIgnoreCase("window"))
+				if(pieces[1].equalsIgnoreCase("window") && pieces[3].equalsIgnoreCase("top"))
 				{
 					topViewCommand(pieces, command);
 				}
@@ -189,10 +188,12 @@ public class CommandInterpreter
 					deleteWindowCommand(pieces, command);
 				}
 			}
+			
+			
 			else if(pieces[0].equalsIgnoreCase("set"))
 			{
 
-				if(pieces[2].equalsIgnoreCase("altitude|depth"))
+				if(pieces[2].equalsIgnoreCase("altitude") || pieces[2].equalsIgnoreCase("depth"))
 				{
 					setAltitudeCommand(pieces, command);
 				}
@@ -296,14 +297,24 @@ public class CommandInterpreter
 		this.id = new AgentID(pieces[2]); 
 		this.size = Integer.parseInt(pieces[6]);
 
-		//Test variables to make program work until Latitude/Longitude parse figured out
-		this.center = new Latitude(49, 39, 32);
-		this.extent = new Latitude(0, 10, 0);
-		this.gridSpacing = new Latitude(0, 0, 30);
-			 
-		this.longCenter = new Longitude(117, 25, 30);
-		this.horizontalExtent = new Longitude(0, 10, 0);
-		this.longGridSpacing = new Longitude(0, 0, 30);
+		String [] latOne = pieces[7].split("[(*'#]");	
+		this.center = new Latitude(Integer.parseInt(latOne[1]),Integer.parseInt(latOne[2]),Double.parseDouble(latOne[3]));
+		
+		String [] latTwo = pieces[8].split("[*'#]");	
+		this.extent = new Latitude(Integer.parseInt(latTwo[0]),Integer.parseInt(latTwo[1]),Double.parseDouble(latTwo[2]));
+		
+		String [] latThree = pieces[9].split("[*'#]");	
+		this.gridSpacing = new Latitude(Integer.parseInt(latThree[0]),Integer.parseInt(latThree[1]),Double.parseDouble(latThree[2]));
+		
+		String [] longOne = pieces[10].split("[(*'#]");	
+		this.longCenter = new Longitude(Integer.parseInt(longOne[1]),Integer.parseInt(longOne[2]),Double.parseDouble(longOne[3]));
+		
+		String [] longTwo = pieces[11].split("[*'#]");	
+		this.horizontalExtent = new Longitude(Integer.parseInt(longTwo[0]),Integer.parseInt(longTwo[1]),Double.parseDouble(longTwo[2]));
+		
+		String [] longThree = pieces[12].split("[*'#]");	
+		this.longGridSpacing = new Longitude(Integer.parseInt(longThree[0]),Integer.parseInt(longThree[1]),Double.parseDouble(longThree[2]));
+		
 			 
 		cmd.schedule(new CommandViewCreateWindowTop(cmd, command, this.id, this.size, this.center, this.extent,
             								this.gridSpacing, this.longCenter, this.horizontalExtent, this.longGridSpacing));
@@ -332,22 +343,20 @@ public class CommandInterpreter
 	{
 		this.id = new AgentID(pieces[2]);
 		this.id2 = new AgentID(pieces[4]);
+
+		String temp[] = pieces[6].split("[*'/\"]");
+		this.latitude = new Latitude(Integer.parseInt(temp[0]),Integer.parseInt(temp[1]),Double.parseDouble(temp[2]));
 		
-		String temp[] = pieces[6].split("/");
-		
-		String [] lat = temp[0].split("[*#*\"]");
-		this.latitude = new Latitude(Integer.parseInt(lat[0]),Integer.parseInt(lat[1]),Double.parseDouble(lat[2]));
-		
-		String [] lon = temp[1].split("[*#*\"]");
+		String [] lon = pieces[7].split("[*'\"/]");
 		this.longitude = new Longitude(Integer.parseInt(lon[0]), Integer.parseInt(lon[1]),Double.parseDouble(lon[2]));
 		
-		this.altitude = new Altitude(Double.parseDouble(temp[2]));
+		this.altitude = new Altitude(Double.parseDouble(lon[4]));
 		
 		this.coordinates = new CoordinateWorld3D(this.latitude,this.longitude, this.altitude);
 		
-		this.course = new Course(Double.parseDouble(pieces[9]));
+		this.course = new Course(Double.parseDouble(pieces[10]));
 				
-		this.speed = new Groundspeed(Double.parseDouble(pieces[11]));
+		this.speed = new Groundspeed(Double.parseDouble(pieces[12]));
 		
 		cmd.schedule(new CommandActorCreateActor(cmd, command, this.id, this.id2, this.coordinates, this.course, this.speed));
 	}
@@ -358,24 +367,17 @@ public class CommandInterpreter
 	private void bombCommand(String [] pieces, String command)
 	{
 		this.id = new AgentID(pieces[3]);
-		cmd.schedule(new CommandMunitionDefineBomb(cmd,command,id));
+		cmd.schedule(new CommandMunitionDefineBomb(cmd,command,this.id));
 	
-		
 	}
 	private void missileCommand(String [] pieces, String command)
 	{
-
-
 		this.id = new AgentID(pieces[3]);
 		this.sensorId = new AgentID(pieces[6]);
 		this.fuzeId = new AgentID(pieces[8]);
 		distance = new DistanceNauticalMiles(Double.parseDouble(pieces[11]));
 
-		
-		
-		cmd.schedule(new CommandMunitionDefineMissile(cmd,command,id,this.sensorId,this.fuzeId,distance));
-		
-		
+		cmd.schedule(new CommandMunitionDefineMissile(cmd,command,this.id,this.sensorId,this.fuzeId,distance));	
 	}
 	
 	private void depthChargeCommand(String[] pieces, String command)
@@ -392,17 +394,13 @@ public class CommandInterpreter
 	private void radarCommand(String [] pieces,String command)
 	{
 		sensorId = new AgentID(pieces[3]);
-		
-		
+			
 		fov =  this.setFov(pieces[8]);
 		power = this.setPower(pieces[10]);
 		sensitivity = this.setSensitivity(pieces[12]);
 		
 		cmd.schedule(new CommandSensorDefineRadar(cmd,command,sensorId,fov,power, sensitivity));
 
-		
-
-		
 	}
 	private void thermalCommand(String[] pieces,String command)
 	{
@@ -420,23 +418,12 @@ public class CommandInterpreter
 	private void sonarCommand(String[] pieces,String command)
 	{
 
-		sonartype = new AgentID(pieces[3]);
+		this.id = new AgentID(pieces[4]);
+		this.sensitivity = new Sensitivity(Double.parseDouble(pieces[7]));
 		
-		sensorId = new AgentID(pieces[4]);
-		/*if(sonartype.equalsIgnoreCase("passive"))
-		{
-			sensitivity = this.setSensitivity(pieces[7]);
-			cmd.schedule(new CommandSensorDefineSonarPassive(cmd,command,sensorId,sensitivity));
+		cmd.schedule(new CommandSensorDefineSonarPassive(cmd,command,this.id,sensitivity));
 			
-		}
-		else if(type.equalsIgnoreCase("active"))
-		{
-			System.out.print("active sensor");
-		}*/
-	//	else
-		//{
-		//	System.out.print("error");
-	//	}
+
 	}
 	
 
@@ -508,8 +495,7 @@ public class CommandInterpreter
 	
 	private void exitCommand(String[] pieces, String command)
 	{
-		id = new AgentID(pieces[2]);
-		cmd.schedule( new CommandMiscExit(cmd,command));
+		cmd.schedule(new CommandMiscExit(cmd,command));
 	}
 	
 	private void pauseCommand(String[] pieces, String command)
@@ -519,6 +505,7 @@ public class CommandInterpreter
 	
 	private void updateTimeCommand(String[] pieces, String command) 
 	{
+		this.time = new Time(Double.parseDouble(pieces[2]));
 		cmd.schedule(new CommandMiscSetUpdate(cmd, command, this.time));
 	}
 	
