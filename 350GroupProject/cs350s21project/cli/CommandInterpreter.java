@@ -334,7 +334,7 @@ public class CommandInterpreter
 	private void setAltitudeCommand(String [] pieces, String command) 
 	{
 		this.id = new AgentID(pieces[1]);
-		this.altitude = new Altitude(Double.parseDouble(pieces[2]));
+		this.altitude = new Altitude(Double.parseDouble(pieces[3]));
 
 		cmd.schedule(new CommandActorSetAltitudeDepth(cmd, command, this.id, this.altitude));
 	}
