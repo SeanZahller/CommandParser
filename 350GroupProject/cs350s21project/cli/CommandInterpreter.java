@@ -333,13 +333,21 @@ public class CommandInterpreter
 		this.id = new AgentID(pieces[2]);
 		this.id2 = new AgentID(pieces[4]);
 		
-		/* Must parse further and split up lat, long, and alt
-		this.latitude = 
-		this.longitude = 
-		this.altitude = 
-		*/
+		String temp[] = pieces[6].split("/");
+		
+		String [] lat = temp[0].split("[*#*\"]");
+		this.latitude = new Latitude(Integer.parseInt(lat[0]),Integer.parseInt(lat[1]),Double.parseDouble(lat[2]));
+		
+		String [] lon = temp[1].split("[*#*\"]");
+		this.longitude = new Longitude(Integer.parseInt(lon[0]), Integer.parseInt(lon[1]),Double.parseDouble(lon[2]));
+		
+		this.altitude = new Altitude(Double.parseDouble(temp[2]));
 		
 		this.coordinates = new CoordinateWorld3D(this.latitude,this.longitude, this.altitude);
+		
+		this.course = new Course(Double.parseDouble(pieces[9]));
+				
+		this.speed = new Groundspeed(Double.parseDouble(pieces[11]));
 		
 		cmd.schedule(new CommandActorCreateActor(cmd, command, this.id, this.id2, this.coordinates, this.course, this.speed));
 	}
