@@ -448,7 +448,7 @@ public class CommandInterpreter
 	}
 	
 	
-	
+
 	//Set Commands
 	private void setLoadMunitionCommand(String[] pieces,String command)
 	{
