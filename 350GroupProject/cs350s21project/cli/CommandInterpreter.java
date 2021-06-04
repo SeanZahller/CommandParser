@@ -204,6 +204,12 @@ public class CommandInterpreter
 				}
 				else if(pieces[2].equalsIgnoreCase("deploy"))
 				{
+					if(pieces[5].equalsIgnoreCase("at"))
+					{
+						//Command 3.9
+					}
+					
+					else
 					setDeployMunition(pieces, command);
 				}
 				else if(pieces[2].equalsIgnoreCase("speed "))
