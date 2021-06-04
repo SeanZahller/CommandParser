@@ -487,7 +487,15 @@ public class CommandInterpreter
 	{
 		this.id = new AgentID(pieces[1]);
 		
-		coordinates = setCoordinates(pieces[4]);
+		String temp[] = pieces[4].split("[*'/\"]");
+		this.latitude = new Latitude(Integer.parseInt(temp[0]),Integer.parseInt(temp[1]),Double.parseDouble(temp[2]));
+		
+		this.longitude = new Longitude(Integer.parseInt(temp[4]), Integer.parseInt(temp[5]),Double.parseDouble(temp[6]));
+		
+		this.altitude = new Altitude(Double.parseDouble(temp[8]));
+		
+		this.coordinates = new CoordinateWorld3D(this.latitude,this.longitude, this.altitude);
+		
 		course = new Course(Double.parseDouble(pieces[7]));
 		speed = new Groundspeed(Double.parseDouble(pieces[9]));
 		
