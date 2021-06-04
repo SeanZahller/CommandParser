@@ -206,9 +206,8 @@ public class CommandInterpreter
 				{
 					if(pieces[5].equalsIgnoreCase("at"))
 					{
-						//Command 3.9
+						//command 3.9 goes here
 					}
-					
 					else
 					setDeployMunition(pieces, command);
 				}
@@ -220,10 +219,7 @@ public class CommandInterpreter
 				{
 					setCourseCommand(pieces,command);
 				}
-				else if(pieces[2].equalsIgnoreCase("altitude"))
-				{	
-					
-				}
+
 			}
 				
 			else if(pieces[0].equalsIgnoreCase("@load"))
