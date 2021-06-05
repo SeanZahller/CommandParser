@@ -77,11 +77,11 @@ public class CommandInterpreter
 	
 	
 
-	public void evaluate(String commandText) throws ParseException
+	public void evaluate(String commandText) throws RuntimeException, ParseException
 	{
 		if(commandText.isEmpty() || commandText.equals(""))
 		{
-			throw new ParseException("\"" + commandText + "\" is an invalid command");
+			throw new RuntimeException("\"" + commandText + "\" is an invalid command");
 		}
 		
 		String[] pieces = commandText.split("//");
@@ -162,7 +162,7 @@ public class CommandInterpreter
 					{
 					 deployMunitionShellCommand(pieces, command);
 					}
-					//next munition goes here.
+					
 				}
 				else if(pieces[1].equalsIgnoreCase("sensor"))
 				{
@@ -203,11 +203,11 @@ public class CommandInterpreter
 					{
 						timeCommand(pieces,command);
 					}
-					//next sensor goes here
 					
 				}
 
-				
+				else
+					throw new RuntimeException("\"" + command + "\" is an invalid command");
 				
 			}
 			
@@ -282,6 +282,8 @@ public class CommandInterpreter
 			}
 			
 		}
+		
+		
 
 	}
 	private Latitude setLatitude(String str)
